@@ -1,20 +1,22 @@
 import os
 from typing import Dict
 
-import sendgrid
-from sendgrid.helpers.mail import Email, Mail, Content, To
+import resend
 from agents import Agent, function_tool
 
 @function_tool
-def send_email(subject: str, html_body: str) -> Dict[str, str]:
-    """ Send an email with the given subject and HTML body """
-    sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
-    from_email = Email("ed@edwarddonner.com") # put your verified sender here
-    to_email = To("ed.donner@gmail.com") # put your recipient here
-    content = Content("text/html", html_body)
-    mail = Mail(from_email, to_email, subject, content).get()
-    response = sg.client.mail.send.post(request_body=mail)
-    print("Email response", response.status_code)
+def send_email(subject:str, body: str):
+    """ Send out an email with the given body to all sales prospects """
+    resend.api_key = os.environ.get('RESEND_API_KEY')
+    
+    params = {
+        "from": "onboarding@resend.dev",  # Change to your verified sender domain
+        "to": "ynahum@gmail.com",  # Change to your recipient
+        "subject": subject,
+        "html": body
+    }
+    
+    response = resend.Emails.send(params)
     return {"status": "success"}
 
 INSTRUCTIONS = """You are able to send a nicely formatted HTML email based on a detailed report.
